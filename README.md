@@ -29,7 +29,7 @@ It is split into **three main parts**:
 8. The main form should open, and you can navigate through the features.
 9. Enjoy using the Community Issue Reporting System!
 
-##Folder Structure:
+## Folder Structure:
  ![Project Screenshot](resources/ "A screenshot of the project interface")
 
 ## Features
