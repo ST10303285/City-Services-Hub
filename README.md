@@ -1,7 +1,7 @@
 # Community Issue Reporting System - City Services Hub
 
-## Team Members: Wadiha Boat (ST10303285)
-## Video Link : https://youtu.be/kg-91Ma4BgM 
+### Team Members: Wadiha Boat (ST10303285)
+### Video Link : https://youtu.be/kg-91Ma4BgM 
 
 ## Overview
 This application is a **Windows Forms C# project** that allows users to report issues within their local community as well as track their requested services and stay updated on local events.  
@@ -10,6 +10,27 @@ It is split into **three main parts**:
 2. **Service Request Tracking and Analysis**
 3. **Local Events and Announcements**
 
+## Technologies and Tools Used 
+- C# (.NET Framework)
+- Windows Forms (WinForms)
+- Visual Studio 2022
+- Custom Classes for data structures.
+- System.Drawing for form and UI styling.
+- GitHub for version control.
+
+## Build and Run
+1. Copy the link from the GitHub repo "".
+2. Open Visual Studio.
+3. On the menu: Clone a Repository -> paste the GitHub repo link -> Clone.
+4. In Solution Explorer, right-click the project and select "Set as Startup Project".
+5. Press F5 or click on the Start button to build and run the application.
+6. Make sure you have .NET Framework installed.
+7. If you encounter any issues, ensure all dependencies are restored via NuGet Package Manager.
+8. The main form should open, and you can navigate through the features.
+9. Enjoy using the Community Issue Reporting System!
+
+##Folder Structure:
+ ![Project Screenshot](resources/ "A screenshot of the project interface")
 
 ## Features
 
@@ -61,20 +82,6 @@ The graph connects issues that are related, for example two leaks in the same ar
 Minimum Spanning Tree (MST) on the other hand finds the shortest path that connects all related requests without repeating the same routes.
 This helps the municipality see which areas clusters of similar problems, how they can plan routes efficiently and which issues can be handled together.
 
-## Technologies and Tools Used 
-- C# (.NET Framework)
-- Windows Forms (WinForms)
-- Visual Studio 2022
-- Custom Classes for data structures.
-- System.Drawing for form and UI styling.
-- GitHub for version control.
-
-## Build and Run
-0. Clone the repo from "https://github.com/VCCT-PROG7312-2025-G2/PROG7312_POE_PART1_ST10303285.git"
-1. Launch the application in Visual Studio (C# .NET Windows Forms).
-2. Set the startup project to MunicipalServicesApp.
-3. Run the application (F5 or Ctrl+F5).
-4. The **Main Menu** will appear, access all the features from here.
 
 ## Changelog from Part 1 & 2 to Past 3
 | Area               | Old version                                  | What changed for Part 3 

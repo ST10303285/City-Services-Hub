@@ -36,7 +36,7 @@ namespace MunicipalServicesApp.Forms
             this.Text = "Local Events & Announcements";
             this.WindowState = FormWindowState.Maximized;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.BackColor = ColorTranslator.FromHtml("#F9F9F9");
+            this.BackColor = ColorTranslator.FromHtml("#e1f5f2");
 
             // ----------------------------------------------------------------- Header Panel --------------------------------------------------------
             headerPanel = new Panel
@@ -146,15 +146,15 @@ namespace MunicipalServicesApp.Forms
             {
                 Location = new Point(1250, 180),
                 Size = new Size(300, 700),
-                BackColor = ColorTranslator.FromHtml("#F0F0F0"),
-                Padding = new Padding(12)
+                BackColor = ColorTranslator.FromHtml("#0e6263"), 
+                Padding = new Padding(8)
             };
 
             lblRecommendations = new Label
             {
                 Text = "Recommended for you",
                 Font = new Font("Segoe UI Semibold", 11F),
-                ForeColor = ColorTranslator.FromHtml("#6CB2B2"),
+                ForeColor = ColorTranslator.FromHtml("#fcfcfc"),
                 AutoSize = true,
                 Location = new Point(12, 12)
             };

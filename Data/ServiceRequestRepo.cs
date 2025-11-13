@@ -1,46 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using MunicipalServicesApp.Model;
-using System.Windows.Forms;
 
 namespace MunicipalServicesApp.Data
 {
     public class ServiceRequestRepo
     {
-        private readonly string filePath;
-        private List<ServiceRequest> items = new List<ServiceRequest>(); // In-memory list of requests.
+        private readonly string filePath;             // full path to the XML file on disk
+        private List<ServiceRequest> items = new List<ServiceRequest>(); // in-memory list of requests
 
-        public ServiceRequestRepo(string fileName = "service_requests.xml") // Constructor: set file location and load existing data.
+        //-------------------------------------------------- Constructor --------------------------------------------------//
+
+        // Create the repository and try to load existing requests from disk.
+        // Default file name is service_requests.xml stored in the application's base folder.
+        public ServiceRequestRepo(string fileName = "service_requests.xml")
         {
-            // store file in application base folder for easy access
+            // store file in application folder so it's easy to find
             filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
             Load();
         }
 
-        public IReadOnlyList<ServiceRequest> All => items.AsReadOnly(); // Give a read-only view of all requests.
+        //---------------------------------------------------- Public API --------------------------------------------------//
 
-        // Add a new request. Save right away so changes persist.
+        // Read-only view of all requests
+        public IReadOnlyList<ServiceRequest> All => items.AsReadOnly();
+
+        // Add a new request and save immediately
         public void Add(ServiceRequest r)
         {
+            if (r == null) return;
             items.Add(r);
             Save();
         }
 
-        // Find a request by its id. Return null if not found.
+        // Find a request by id (returns null when not found)
         public ServiceRequest GetById(string id)
         {
+            if (string.IsNullOrEmpty(id)) return null;
             return items.Find(x => x.Id == id);
         }
 
-        // Replace an existing request with an updated one.
+        // Update an existing request (matches by Id) and save changes
         public void Update(ServiceRequest updated)
         {
-            var idx = items.FindIndex(x => x.Id == updated.Id);
+            if (updated == null) return;
+
+            int idx = items.FindIndex(x => x.Id == updated.Id);
             if (idx >= 0)
             {
                 items[idx] = updated;
@@ -48,23 +52,26 @@ namespace MunicipalServicesApp.Data
             }
         }
 
-        // Save the list to an XML file.
+        //-------------------------------------------------- Persistence --------------------------------------------------//
+
+        // Save the in-memory list to an XML file.
+        // Keeps data between runs. Shows a MessageBox on failure.
         public void Save()
         {
             try
             {
-                var ser = new XmlSerializer(typeof(List<ServiceRequest>));
-                // create or overwrite file and write list
+                var serializer = new XmlSerializer(typeof(List<ServiceRequest>));
                 using var stream = File.Create(filePath);
-                ser.Serialize(stream, items);
+                serializer.Serialize(stream, items);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving requests: " + ex.Message, "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error saving requests: " + ex.Message,
+                    "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // Load requests from the XML file into memory.
+        // Load the list from the XML file. If file doesn't exist or is invalid, start with an empty list.
         public void Load()
         {
             try
@@ -74,13 +81,14 @@ namespace MunicipalServicesApp.Data
                     items = new List<ServiceRequest>();
                     return;
                 }
-                var ser = new XmlSerializer(typeof(List<ServiceRequest>));
+
+                var serializer = new XmlSerializer(typeof(List<ServiceRequest>));
                 using var stream = File.OpenRead(filePath);
-                items = (List<ServiceRequest>)ser.Deserialize(stream) ?? new List<ServiceRequest>();
+                items = (List<ServiceRequest>)serializer.Deserialize(stream) ?? new List<ServiceRequest>();
             }
             catch
             {
-                // if corrupt or fail, start fresh to avoid crashes
+                // If anything goes wrong (corrupt file, etc.), reset to an empty list to avoid crashes.
                 items = new List<ServiceRequest>();
             }
         }

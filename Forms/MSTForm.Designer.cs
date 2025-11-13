@@ -10,6 +10,15 @@ namespace MunicipalServicesApp.Forms
         private Label lblHeader;
         private Label lblTotal;
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // nothing extra to dispose here, but keep pattern consistent
+            }
+            base.Dispose(disposing);
+        }
+
         private void InitializeComponent()
         {
             this.Text = "Minimum Spanning Tree (Service Request Network)";
@@ -17,6 +26,7 @@ namespace MunicipalServicesApp.Forms
             this.Size = new Size(900, 700);
             this.StartPosition = FormStartPosition.CenterParent;
 
+            // ---------------------------------------------------------------------------------------- Header ------------------------------------------------------------------
             lblHeader = new Label
             {
                 Text = "📊 Service Request Similarity Network",
@@ -27,6 +37,7 @@ namespace MunicipalServicesApp.Forms
                 Padding = new Padding(12, 10, 0, 0)
             };
 
+            // ---------------------------------------------------------------------------------------- Total label ------------------------------------------------------------
             lblTotal = new Label
             {
                 Text = "Total Network Cost:",
@@ -34,9 +45,10 @@ namespace MunicipalServicesApp.Forms
                 ForeColor = ColorTranslator.FromHtml("#333"),
                 Dock = DockStyle.Bottom,
                 Height = 40,
-                Padding = new Padding(24,8,24,8)
+                Padding = new Padding(24, 8, 24, 8)
             };
 
+            // ---------------------------------------------------------------------------------------- Flow Panel ------------------------------------------------------------
             flowPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -47,11 +59,13 @@ namespace MunicipalServicesApp.Forms
                 BackColor = ColorTranslator.FromHtml("#F9F9F9")
             };
 
+            // Add controls to the form
             this.Controls.Add(flowPanel);
             this.Controls.Add(lblHeader);
             this.Controls.Add(lblTotal);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------//
         private GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
             var path = new GraphicsPath();
@@ -63,5 +77,6 @@ namespace MunicipalServicesApp.Forms
             path.CloseFigure();
             return path;
         }
+        //-----------------------------------------------------------------------------------------------------------------//
     }
 }

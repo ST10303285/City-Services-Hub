@@ -8,18 +8,22 @@ using MunicipalServicesApp.Model;
 
 namespace MunicipalServicesApp.Forms
 {
+
+    // This form shows a list of recently reported service requests.
     public partial class RecentRequestsForm : Form
     {
-        private List<ServiceRequest> recentList = new List<ServiceRequest>();
+        private List<ServiceRequest> recentList = new List<ServiceRequest>(); // in-memory list of recent requests
 
-        public RecentRequestsForm(IEnumerable<ServiceRequest> recent, int max = 10)
+        public RecentRequestsForm(IEnumerable<ServiceRequest> recent, int max = 10) // Constructor takes list of requests
         {
+            // Initialize UI and keep only up to 'max' recent items
             InitializeComponent();
             recentList = (recent ?? Enumerable.Empty<ServiceRequest>()).Take(max).ToList();
             Populate(recentList);
         }
 
-        private void Populate(List<ServiceRequest> list)
+        //-----------------------------------------------------------------------------------------------------------------//
+        private void Populate(List<ServiceRequest> list) // Fill the panel with cards for each recent request
         {
             panel.Controls.Clear();
 
@@ -33,6 +37,8 @@ namespace MunicipalServicesApp.Forms
                     Padding = new Padding(10)
                 };
                 card.Region = new Region(RoundedRect(new Rectangle(0, 0, card.Width, card.Height), 8));
+
+                // draw light rounded border for card
                 card.Paint += (s, e) =>
                 {
                     e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -40,6 +46,7 @@ namespace MunicipalServicesApp.Forms
                     e.Graphics.DrawPath(pen, RoundedRect(new Rectangle(0, 0, card.Width - 1, card.Height - 1), 8));
                 };
 
+                // Title line shows date, shortened category and location
                 var title = new Label
                 {
                     Text = $"{r.DateReported:yyyy-MM-dd HH:mm} | {Shorten(r.Category, 30)} | {Shorten(r.Location, 30)}",
@@ -49,6 +56,7 @@ namespace MunicipalServicesApp.Forms
                     Size = new Size(card.Width - 140, 22)
                 };
 
+                // Short description preview
                 var desc = new Label
                 {
                     Text = Shorten(r.Description ?? "", 180),
@@ -58,6 +66,7 @@ namespace MunicipalServicesApp.Forms
                     Size = new Size(card.Width - 140, 48)
                 };
 
+                // Details button opens a simple MessageBox with full details
                 var btn = new Button
                 {
                     Text = "Details",
@@ -78,6 +87,7 @@ namespace MunicipalServicesApp.Forms
                 card.Controls.Add(desc);
                 card.Controls.Add(btn);
 
+                // Make card responsive when resized
                 card.Resize += (s, e) =>
                 {
                     title.Size = new Size(card.Width - 140, 22);
@@ -88,6 +98,7 @@ namespace MunicipalServicesApp.Forms
                 panel.Controls.Add(card);
             }
 
+            // when there are no recent requests, show a small message
             if (!list.Any())
             {
                 var empty = new Label
@@ -102,9 +113,11 @@ namespace MunicipalServicesApp.Forms
             }
         }
 
-        private string Shorten(string s, int max) => string.IsNullOrEmpty(s) ? "" : (s.Length <= max ? s : s.Substring(0, max - 3) + "...");
+        //-----------------------------------------------------------------------------------------------------------------//
+        private string Shorten(string s, int max) => string.IsNullOrEmpty(s) ? "" : (s.Length <= max ? s : s.Substring(0, max - 3) + "..."); // Shorten long text safely
 
-        private GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        //-----------------------------------------------------------------------------------------------------------------//
+        private GraphicsPath RoundedRect(Rectangle bounds, int radius) // Helper: rounded rectangle path for nicer visuals
         {
             var path = new GraphicsPath();
             int d = radius * 2;
@@ -115,5 +128,6 @@ namespace MunicipalServicesApp.Forms
             path.CloseFigure();
             return path;
         }
+        //-----------------------------------------------------------------------------------------------------------------//
     }
 }

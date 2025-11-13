@@ -7,6 +7,8 @@ using System.Windows.Forms;
 
 namespace MunicipalServicesApp.Forms
 {
+
+    // This form shows a minimum spanning tree (MST) of related service requests.
     public partial class MSTForm : Form
     {
         public class Edge
@@ -17,16 +19,19 @@ namespace MunicipalServicesApp.Forms
             public string Category { get; set; }
         }
 
-        public MSTForm(IEnumerable<Edge> edges, int totalDistance)
+        public MSTForm(IEnumerable<Edge> edges, int totalDistance) // Constructor takes edges and total distance
         {
+            // Initialize UI components and populate the list
             InitializeComponent();
             Populate(edges?.ToList() ?? new List<Edge>(), totalDistance);
         }
 
-        private void Populate(List<Edge> edges, int total)
+        //-----------------------------------------------------------------------------------------------------------------//
+        private void Populate(List<Edge> edges, int total) // Fill the flow panel with grouped edge cards
         {
             flowPanel.Controls.Clear();
 
+            // If there are no edges, show a small message
             if (edges.Count == 0)
             {
                 flowPanel.Controls.Add(new Label
@@ -39,15 +44,16 @@ namespace MunicipalServicesApp.Forms
                 return;
             }
 
-            // Normalize category names
+            // Normalize category names so similar categories group together
             foreach (var e in edges)
                 e.Category = NormalizeCategory(e.Category);
 
-            //Group edges by normalized category
+            // Group edges by normalized category and sort groups alphabetically
             var grouped = edges
                 .GroupBy(e => e.Category ?? "Miscellaneous")
                 .OrderBy(g => g.Key);
 
+            // For each group add a header and a card for every edge in that group
             foreach (var group in grouped)
             {
                 var icon = GetCategoryIcon(group.Key);
@@ -71,10 +77,12 @@ namespace MunicipalServicesApp.Forms
                 }
             }
 
+            // Show total network cost at the bottom
             lblTotal.Text = $"Total Network Cost: {total}";
         }
 
-        private string NormalizeCategory(string cat)
+        //-----------------------------------------------------------------------------------------------------------------//
+        private string NormalizeCategory(string cat) // Convert messy category strings into friendly names
         {
             if (string.IsNullOrWhiteSpace(cat)) return "Miscellaneous";
             cat = cat.Trim().ToLower();
@@ -88,7 +96,8 @@ namespace MunicipalServicesApp.Forms
             return "Miscellaneous";
         }
 
-        private string GetCategoryIcon(string category)
+        //-----------------------------------------------------------------------------------------------------------------//
+        private string GetCategoryIcon(string category) // Return a small emoji icon for the category
         {
             return category switch
             {
@@ -102,7 +111,8 @@ namespace MunicipalServicesApp.Forms
             };
         }
 
-        private Panel CreateEdgeCard(Edge e)
+        //-----------------------------------------------------------------------------------------------------------------//
+        private Panel CreateEdgeCard(Edge e) // Create a UI card to display one edge
         {
             var card = new Panel
             {
@@ -115,7 +125,7 @@ namespace MunicipalServicesApp.Forms
 
             var lblMain = new Label
             {
-                Text = $"{e.From}  ↔  {e.To}",
+                Text = $"{e.From}  ↔  {e.To}", // endpoints of the connection
                 Font = new Font("Segoe UI Semibold", 11F),
                 AutoSize = false,
                 Size = new Size(card.Width - 20, 26),
@@ -124,7 +134,7 @@ namespace MunicipalServicesApp.Forms
 
             var lblCost = new Label
             {
-                Text = $"Connection Strength: {6 - e.Distance} / 5   (Cost: {e.Distance})",
+                Text = $"Connection Strength: {6 - e.Distance} / 5   (Cost: {e.Distance})", // show strength and cost
                 Font = new Font("Segoe UI", 9.5F),
                 ForeColor = Color.DimGray,
                 AutoSize = false,
@@ -146,6 +156,7 @@ namespace MunicipalServicesApp.Forms
             card.Controls.Add(lblCost);
             card.Controls.Add(lblDesc);
 
+            // Draw a light rounded border on the card
             card.Paint += (s, e2) =>
             {
                 e2.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -155,5 +166,7 @@ namespace MunicipalServicesApp.Forms
 
             return card;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------//
     }
 }

@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Windows.Forms;
 using MunicipalServicesApp.Model;
 
 namespace MunicipalServicesApp.Forms
 {
+    // This form shows requests ordered by priority (highest priority first).
     public partial class RequestPriorityForm : Form
     {
 
-        // Constructor: make UI and fill with items.
+        // Constructor: create UI and fill it with provided requests.
         public RequestPriorityForm(IEnumerable<ServiceRequest> orderedRequests)
         {
             InitializeComponent();
@@ -19,6 +19,7 @@ namespace MunicipalServicesApp.Forms
             Populate(orderedRequests?.ToList() ?? new List<ServiceRequest>());
         }
 
+        //-----------------------------------------------------------------------------------------------------------------//
         // Put cards into the panel. If no items, show a message.
         private void Populate(List<ServiceRequest> list)
         {
@@ -45,6 +46,7 @@ namespace MunicipalServicesApp.Forms
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------//
         // Make one card UI for a request. This is a panel with text and a button.
         private Panel CreateCard(ServiceRequest r, int index)
         {
@@ -139,12 +141,14 @@ namespace MunicipalServicesApp.Forms
             return card;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------//
         private string Shorten(string s, int max)
         {
             if (string.IsNullOrEmpty(s)) return "";
             return s.Length <= max ? s : s.Substring(0, max - 3) + "...";
         }
 
+        //-----------------------------------------------------------------------------------------------------------------//
         // utility used by CreateCard for rounded corners
         private GraphicsPath RoundedRect(Rectangle bounds, int radius)
         {
@@ -157,5 +161,6 @@ namespace MunicipalServicesApp.Forms
             path.CloseFigure();
             return path;
         }
+        //-----------------------------------------------------------------------------------------------------------------//
     }
 }

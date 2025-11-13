@@ -25,13 +25,13 @@ namespace MunicipalServicesApp.Forms
         {
             components = new Container();
 
-            // Form
+            // Form title and basic properties
             this.Text = "Recent Requests";
             this.Size = new Size(840, 620);
             this.StartPosition = FormStartPosition.CenterParent;
             this.BackColor = ColorTranslator.FromHtml("#F9F9F9");
 
-            // Header
+            // ---------------------------------------------------------------------------------------- Header ------------------------------------------------------------------
             hdr = new Label
             {
                 Text = "Most Recent Service Requests",
@@ -41,7 +41,7 @@ namespace MunicipalServicesApp.Forms
                 Padding = new Padding(12, 8, 0, 0)
             };
 
-            // Main panel
+            // ---------------------------------------------------------------------------------------- Main panel ------------------------------------------------------------
             panel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -50,6 +50,7 @@ namespace MunicipalServicesApp.Forms
                 Padding = new Padding(12)
             };
 
+            // Add controls to form
             this.Controls.Add(panel);
             this.Controls.Add(hdr);
         }

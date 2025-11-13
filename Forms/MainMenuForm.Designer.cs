@@ -27,22 +27,42 @@ namespace MunicipalServicesApp
 
             // Header Panel
             this.headerPanel.Dock = DockStyle.Top;
-            this.headerPanel.Height = 110;
+            this.headerPanel.Height = 180;
             this.headerPanel.BackColor = ColorTranslator.FromHtml("#6CB2B2"); // pastel teal
+
+           var municipalLogo = new PictureBox
+           {
+               Name = "Cape Town Municipal",
+               Size = new Size(260, 180),
+               Location = new Point(480, -3),
+               SizeMode = PictureBoxSizeMode.Zoom,
+               BackColor = Color.Transparent
+           };
+            headerPanel.Controls.Add(municipalLogo);
+
+            try
+            {
+                municipalLogo.Image = Properties.Resources.CPT_Municipal;
+            }
+            catch
+            {
+                // if resource not found, leave blank (no crash)
+            }
+        
 
             // Title
             this.lblTitle.Text = "City Services Hub — Municipal Services";
             this.lblTitle.Font = new Font("Segoe UI Semibold", 20F, FontStyle.Bold);
             this.lblTitle.ForeColor = Color.White;
             this.lblTitle.AutoSize = true;
-            this.lblTitle.Location = new Point(24, 18);
+            this.lblTitle.Location = new Point(municipalLogo.Right -2, 48);
 
             // Subtitle
             this.lblSubtitle.Text = "Report issues, view updates and stay in touch with your municipality.";
             this.lblSubtitle.Font = new Font("Segoe UI", 10F);
             this.lblSubtitle.ForeColor = Color.WhiteSmoke;
             this.lblSubtitle.AutoSize = true;
-            this.lblSubtitle.Location = new Point(26, 58);
+            this.lblSubtitle.Location = new Point(municipalLogo.Right +5, 88);
 
             this.headerPanel.Controls.Add(this.lblTitle);
             this.headerPanel.Controls.Add(this.lblSubtitle);
@@ -69,8 +89,8 @@ namespace MunicipalServicesApp
         {
             var panel = new Panel()
             {
-                Size = new Size(1800, 200),
-                BackColor = Color.White,
+                Size = new Size(1850, 240),
+                BackColor = ColorTranslator.FromHtml("#e1f5f2"),
                 Margin = new Padding(8),
                
 
@@ -82,9 +102,9 @@ namespace MunicipalServicesApp
             {
                 var g = e.Graphics;
                 g.SmoothingMode = SmoothingMode.AntiAlias;
-                using (var pen = new Pen(Color.LightGray))
+                using (var pen = new Pen(Color.Maroon))
                 {
-                    g.DrawPath(pen, RoundedRect(new Rectangle(0, 0, panel.Width - 1, panel.Height - 1), 12));
+                    g.DrawPath(pen, RoundedRect(new Rectangle(0, 0, panel.Width -2, panel.Height -2), 12));
                 }
             };
 
@@ -93,7 +113,7 @@ namespace MunicipalServicesApp
             {
                 Image = icon,
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Location = new Point(16, 25),
+                Location = new Point(16, 95),
                 Size = new Size(64, 64)
             };
 
@@ -101,7 +121,7 @@ namespace MunicipalServicesApp
             {
                 Text = title,
                 Font = new Font("Segoe UI", 12F, FontStyle.Bold),
-                Location = new Point(96, 10),
+                Location = new Point(96, 95),
                 AutoSize = true
             };
 
@@ -110,7 +130,7 @@ namespace MunicipalServicesApp
                 Text = desc,
                 Font = new Font("Segoe UI", 9F),
                 ForeColor = Color.DimGray,
-                Location = new Point(96, 40),
+                Location = new Point(96, 125),
                 AutoSize = false,
                 Size = new Size(480, 60)
             };
@@ -118,11 +138,11 @@ namespace MunicipalServicesApp
             var btn = new Button()
             {
                 Text = enabled ? "Open" : "Coming Soon",
-                Location = new Point(1600, 35),
+                Location = new Point(1650, 95),
                 Size = new Size(150, 45),
                 Enabled = enabled,
-                BackColor = enabled ? ColorTranslator.FromHtml("#A8D8EA") : ColorTranslator.FromHtml("#D6D6D6"),
-                ForeColor = Color.Black,
+                BackColor = enabled ? ColorTranslator.FromHtml("#0e6263") : ColorTranslator.FromHtml("#D6D6D6"),
+                ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10F, FontStyle.Regular),
             };

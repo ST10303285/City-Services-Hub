@@ -1,39 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using MunicipalServicesApp.Model;
 using MunicipalServicesApp.Data;
+using MunicipalServicesApp.Model;
 
 namespace MunicipalServicesApp.Forms
 {
+    // Logic / event handlers for the ServiceRequestStatusForm
     public partial class ServiceRequestStatusForm : Form
     {
-
         // repo holds saved requests on disk
         private readonly ServiceRequestRepo repo;
         // data structures used in the form
         private AvlTree avl;
         private RequestPriorityHeap heap;
         private ServiceRouteNetwork graph;
-       
-        private Button btnCloseEmbedded;
-        
+
+        // overlay controls (created lazily)
+        private Panel overlayPanel;
+        private Button btnCloseOverlay;
+
         public ServiceRequestStatusForm()
         {
-            InitialiseComponent();
-            // create repository (it will load file)
+            InitializeComponent();
+
+            // load repository (file-backed)
             repo = new ServiceRequestRepo();
             SampleRequestSeedercs.SeedIfEmpty(repo);
 
-
-
-            //Initialise AVL tree and heap, and load data into it
+            // build AVL and heap
             avl = new AvlTree();
             heap = new RequestPriorityHeap();
             foreach (var r in repo.All)
@@ -42,142 +38,43 @@ namespace MunicipalServicesApp.Forms
                 heap.Insert(r);
             }
 
-            graph = new ServiceRouteNetwork(); // Build a simple graph from requests (used for route analysis)
+            // build demo graph
+            graph = new ServiceRouteNetwork();
             graph.BuildFromRequests(repo.All, threshold: 10.0);
             var rand = new Random();
             var locations = repo.All.Select(r => r.Location).Distinct().Take(6).ToList();
             for (int i = 0; i < locations.Count - 1; i++)
-            {
                 for (int j = i + 1; j < locations.Count; j++)
-                {
-                    int weight = rand.Next(1, 15); // random distance
-                    graph.AddEdge(locations[i], locations[j], weight);
-                }
-            }
+                    graph.AddEdge(locations[i], locations[j], rand.Next(1, 15));
 
-            CreateContentPanel();  // create a hidden panel we can show forms inside
-
-            btnRefresh.Click += (s, e) => RefreshGrid();
+            // wire up basic buttons
+            btnRefresh.Click += (s, e) => RefreshCards();
             btnSearch.Click += (s, e) => SearchById();
             btnPrioritise.Click += (s, e) => ShowPriorityOrder();
             btnShowMST.Click += (s, e) => ShowGraphMST();
-            btnBack.Click += (s, e) => this.Close();
+            btnBack.Click += (s, e) => Close();
             btnRecent.Click += (s, e) => ShowRecentRequests();
 
-        // initial load
-        RefreshGrid();
+            // Populate after the form is displayed so layout sizes are available
+            this.Shown += (s, e) => RefreshCards();
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void CreateContentPanel()  // create the panel where we will embed other small forms
-        {
-            contentPanel = new Panel
-            {
-                BackColor = ColorTranslator.FromHtml("#F9F9F9"),
-                BorderStyle = BorderStyle.None,
-                Visible = false
-            };
-
-            if (this.Controls.Contains(dataGridViewRequests))
-            {
-                contentPanel.Location = dataGridViewRequests.Location;
-                contentPanel.Size = dataGridViewRequests.Size;
-                contentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            }
-            else
-            {
-                contentPanel.Dock = DockStyle.Fill;
-            }
-
-            btnCloseEmbedded = new Button
-            {
-                Text = "Close",
-                Size = new Size(80, 30),
-                BackColor = ColorTranslator.FromHtml("#E6E6E6"),
-                FlatStyle = FlatStyle.Flat,
-                Location = new Point(Math.Max(8, contentPanel.Width - 88), 8),
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Right
-            };
-            btnCloseEmbedded.FlatAppearance.BorderSize = 0;
-            btnCloseEmbedded.Click += (s, e) => CloseEmbedded();
-
-            contentPanel.Resize += (s, e) =>
-            {
-                btnCloseEmbedded.Location = new Point(Math.Max(8, contentPanel.Width - btnCloseEmbedded.Width - 8), 8);
-            };
-
-            contentPanel.Controls.Add(btnCloseEmbedded);
-            this.Controls.Add(contentPanel);
-            contentPanel.BringToFront();
-        }
-
-
-        private bool IsEmbeddedVisible() // check if embedded panel currently shows something other than the close button
-        {
-            return contentPanel != null && contentPanel.Visible && contentPanel.Controls.Count > 1; // close button is always present
-        }
-
-        private void CloseEmbedded()
-        {
-            if (contentPanel == null) return;
-
-            for (int i = contentPanel.Controls.Count - 1; i >= 0; i--)
-            {
-                var c = contentPanel.Controls[i];
-                if (c == btnCloseEmbedded) continue;
-                if (c is Form f)
-                {
-                    try { f.Close(); } catch { }
-                    try { f.Dispose(); } catch { }
-                }
-                contentPanel.Controls.Remove(c);
-            }
-
-            contentPanel.Visible = false;
-
-            if (dataGridViewRequests != null) dataGridViewRequests.Visible = true;
-        }
-
-        private void EmbedForm(Form toEmbed)
-        {
-            if (contentPanel == null) CreateContentPanel();
-            CloseEmbedded();
-
-            toEmbed.TopLevel = false;
-            toEmbed.FormBorderStyle = FormBorderStyle.None;
-            toEmbed.Dock = DockStyle.Fill;
-
-            contentPanel.Controls.Add(toEmbed);
-            contentPanel.Controls.SetChildIndex(btnCloseEmbedded, 0);
-
-            contentPanel.Visible = true;
-
-            if (dataGridViewRequests != null) dataGridViewRequests.Visible = false;
-
-            toEmbed.Show();
-        }
-
-
-        // Load repository items into the grid
-        private void RefreshGrid()
+        // Refresh card UI
+        private void RefreshCards()
         {
             try
             {
-                var list = repo.All
-                    .OrderByDescending(x => x.DateReported)
-                    .Select(x => new
+                // schedule after layout pass
+                this.BeginInvoke((Action)(() =>
+                {
+                    PopulateCards();
+                    if (cardsPanel.Controls.Count > 0)
                     {
-                        Id = x.Id,
-                        Category = x.Category,
-                        Location = x.Location,
-                        Priority = x.Priority,
-                        Status = x.Status,
-                        DateReported = x.DateReported
-                    }).ToList();
-
-                dataGridViewRequests.DataSource = null;
-                dataGridViewRequests.DataSource = list;
-                dataGridViewRequests.AutoResizeColumns();
+                        cardsPanel.ScrollControlIntoView(cardsPanel.Controls[0]);
+                    }
+                }));
             }
             catch (Exception ex)
             {
@@ -185,22 +82,195 @@ namespace MunicipalServicesApp.Forms
             }
         }
 
-        // Search by GUID / ID string (copy ID from grid)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        private void PopulateCards()
+        {
+            cardsPanel.SuspendLayout();
+            cardsPanel.Controls.Clear();
+
+            var list = repo?.All?.OrderByDescending(x => x.DateReported).ToList()
+                       ?? new System.Collections.Generic.List<ServiceRequest>();
+
+            if (list.Count == 0)
+            {
+                var empty = new Label
+                {
+                    Text = "No requests available. Try Refresh or add a new request from the main menu.",
+                    Font = new Font("Segoe UI", 12F),
+                    ForeColor = Color.DimGray,
+                    AutoSize = false,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Size = new Size(Math.Max(400, cardsPanel.ClientSize.Width - 48), 120),
+                    Margin = new Padding(20)
+                };
+                cardsPanel.Controls.Add(empty);
+                cardsPanel.ResumeLayout();
+                return;
+            }
+
+            foreach (var r in list)
+            {
+                var card = CreateRequestCard(r);
+                card.Width = Math.Max(600, cardsPanel.ClientSize.Width - 48);
+                cardsPanel.Controls.Add(card);
+            }
+
+            cardsPanel.ResumeLayout();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Create a single request card 
+        private Panel CreateRequestCard(ServiceRequest r)
+        {
+            // Pick color by priority (1–5)
+            Color bg;
+            Color border;
+
+            switch (r.Priority)
+            {
+                case 1:
+                    bg = ColorTranslator.FromHtml("#FFCCCC");   // pastel red
+                    border = ColorTranslator.FromHtml("#E6A6A6");
+                    break;
+
+                case 2:
+                    bg = ColorTranslator.FromHtml("#FFE6CC");   // pastel peach
+                    border = ColorTranslator.FromHtml("#E6C7A6");
+                    break;
+
+                case 3:
+                    bg = ColorTranslator.FromHtml("#C1CDF5");   // pastel lavender-blue (your choice)
+                    border = ColorTranslator.FromHtml("#9AAFE6");
+                    break;
+
+                case 4:
+                    bg = ColorTranslator.FromHtml("#D6F5D6");   // pastel mint green
+                    border = ColorTranslator.FromHtml("#B3E6B3");
+                    break;
+
+                case 5:
+                    bg = ColorTranslator.FromHtml("#A7CEEB");   // light blue
+                    border = ColorTranslator.FromHtml("#224761");
+                    break;
+
+                default:
+                    bg = Color.White;
+                    border = Color.LightGray;
+                    break;
+            }
+
+            var card = new Panel
+            {
+                Height = 140,
+                BackColor = bg,
+                Margin = new Padding(8),
+                Padding = new Padding(12),
+                Cursor = Cursors.Hand
+            };
+
+            // rounded region; will be repainted on size
+            card.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                using (var path = RoundedRect(new Rectangle(0, 0, card.Width - 1, card.Height - 1), 10))
+                using (var pen = new Pen(border))
+                using (var fill = new SolidBrush(bg))
+                {
+                    e.Graphics.FillPath(fill, path);
+                    e.Graphics.DrawPath(pen, path);
+                }
+            };
+
+            // Labels
+            var lblTitle = new Label
+            {
+                Text = $"{Shorten(r.Category, 30)} — {Shorten(r.Location, 60)}",
+                Font = new Font("Segoe UI Semibold", 11F),
+                Location = new Point(12, 10),
+                AutoSize = true
+            };
+
+            var lblMeta = new Label
+            {
+                Text = $"Priority: {r.Priority}  |  Status: {r.Status}  |  {r.DateReported:yyyy-MM-dd HH:mm}",
+                Font = new Font("Segoe UI", 9F),
+                ForeColor = Color.FromArgb(80, 80, 80),
+                Location = new Point(12, 36),
+                AutoSize = true
+            };
+
+            var lblDesc = new Label
+            {
+                Text = Shorten(r.Description ?? "", 180),
+                Font = new Font("Segoe UI", 9F),
+                ForeColor = Color.DimGray,
+                Location = new Point(12, 60),
+                AutoSize = true
+            };
+
+            var lblId = new Label
+            {
+                Text = $"ID: {r.Id}",
+                Font = new Font("Segoe UI", 8F),
+                ForeColor = Color.FromArgb(130, 130, 130),
+                Location = new Point(12, 100),
+                AutoSize = true
+            };
+
+            // Open button
+            var btnOpen = new Button
+            {
+                Text = "Open",
+                Size = new Size(110, 36),
+                BackColor = ColorTranslator.FromHtml("#6CB2B2"),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnOpen.FlatAppearance.BorderSize = 0;
+            btnOpen.Region = new Region(RoundedRect(new Rectangle(0, 0, btnOpen.Width, btnOpen.Height), 8));
+            btnOpen.Click += (s, e) =>
+            {
+                var details = $"ID: {r.Id}\nCategory: {r.Category}\nLocation: {r.Location}\nPriority: {r.Priority}\nStatus: {r.Status}\nDate: {r.DateReported}\n\nDescription:\n{r.Description}";
+                MessageBox.Show(details, "Request Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+
+            card.Controls.Add(lblTitle);
+            card.Controls.Add(lblMeta);
+            card.Controls.Add(lblDesc);
+            card.Controls.Add(lblId);
+            card.Controls.Add(btnOpen);
+
+            card.Resize += (s, e) =>
+            {
+                btnOpen.Location = new Point(card.ClientSize.Width - btnOpen.Width - 18, (card.ClientSize.Height - btnOpen.Height) / 2);
+
+                int rightLimit = btnOpen.Location.X - 24;
+                lblTitle.MaximumSize = new Size(Math.Max(100, rightLimit - lblTitle.Location.X), 0);
+                lblMeta.MaximumSize = new Size(Math.Max(100, rightLimit - lblMeta.Location.X), 0);
+                lblDesc.MaximumSize = new Size(Math.Max(100, rightLimit - lblDesc.Location.X), 0);
+            };
+
+            // initial layout trigger
+            card.Width = Math.Max(600, this.ClientSize.Width - 80);
+            card.PerformLayout();
+
+            return card;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Basic search by ID
         private void SearchById()
         {
             var id = txtSearchId.Text?.Trim();
             if (string.IsNullOrWhiteSpace(id))
             {
-                MessageBox.Show("Enter a Request ID to search (copy from the grid).", "Input required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Enter a Request ID to search (copy from the list).", "Input required", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            // Try AVL search first
-            var req = avl?.SearchById(id);
-
-            // Fall back to repo search if AVL not available or not found
-            if (req == null)
-                req = repo.GetById(id);
+            var req = avl?.SearchById(id) ?? repo.GetById(id);
 
             if (req == null)
             {
@@ -208,32 +278,30 @@ namespace MunicipalServicesApp.Forms
                 return;
             }
 
-            // show a simple details dialog
             var details = $"ID: {req.Id}\nCategory: {req.Category}\nLocation: {req.Location}\nPriority: {req.Priority}\nStatus: {req.Status}\nDate: {req.DateReported}\n\nDescription:\n{req.Description}";
             MessageBox.Show(details, "Request Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void ShowPriorityOrder() // show requests ordered by priority inside an embedded form
-        {
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            if (repo.All == null || repo.All.Count ==0)
+        // Show priority form in overlay
+        private void ShowPriorityOrder()
+        {
+            if (repo.All == null || repo.All.Count == 0)
             {
                 MessageBox.Show("No requests available.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            var ordered = repo.All
-                .OrderBy(r => r.Priority)
-                .ThenByDescending(r => r.DateReported)
-                .ToList();
-
+            var ordered = repo.All.OrderBy(r => r.Priority).ThenByDescending(r => r.DateReported).ToList();
             var priorityForm = new RequestPriorityForm(ordered);
-            EmbedForm(priorityForm);
-
-
+            ShowOverlayForm(priorityForm);
         }
 
-        private void ShowGraphMST() // get MST from the graph and show it in a form
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Show MST form in overlay
+        private void ShowGraphMST()
         {
             if (graph == null)
             {
@@ -249,19 +317,13 @@ namespace MunicipalServicesApp.Forms
                 return;
             }
 
-            // convert to MSTForm's edge type
             var edges = edgesTuples.Select(t =>
             {
                 var fromReq = repo.GetById(t.from);
                 var toReq = repo.GetById(t.to);
 
-                string fromLabel = fromReq != null
-                    ? $"{fromReq.Category} — {fromReq.Location}"
-                    : t.from;
-
-                string toLabel = toReq != null
-                    ? $"{toReq.Category} — {toReq.Location}"
-                    : t.to;
+                string fromLabel = fromReq != null ? $"{fromReq.Category} — {fromReq.Location}" : t.from;
+                string toLabel = toReq != null ? $"{toReq.Category} — {toReq.Location}" : t.to;
 
                 return new MSTForm.Edge
                 {
@@ -273,10 +335,12 @@ namespace MunicipalServicesApp.Forms
             }).ToList();
 
             var mstForm = new MSTForm(edges, totalCost);
-            EmbedForm(mstForm);
+            ShowOverlayForm(mstForm);
         }
 
-        // show most recent requests using AVL helper
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Show recent requests in overlay
         private void ShowRecentRequests()
         {
             if (avl == null)
@@ -293,12 +357,105 @@ namespace MunicipalServicesApp.Forms
             }
 
             var recentForm = new RecentRequestsForm(recent10, 10);
-            EmbedForm(recentForm);
+            ShowOverlayForm(recentForm);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        // Overlay helpers
+        private void EnsureOverlay()
+        {
+            if (overlayPanel != null) return;
 
+            overlayPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.FromArgb(245, 245, 245),
+                Visible = false
+            };
 
+            btnCloseOverlay = new Button
+            {
+                Text = "Close",
+                Size = new Size(80, 30),
+                BackColor = ColorTranslator.FromHtml("#E6E6E6"),
+                FlatStyle = FlatStyle.Flat,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            btnCloseOverlay.FlatAppearance.BorderSize = 0;
+            btnCloseOverlay.Region = new Region(RoundedRect(new Rectangle(0, 0, btnCloseOverlay.Width, btnCloseOverlay.Height), 6));
+            btnCloseOverlay.Click += (s, e) => CloseOverlay();
 
+            overlayPanel.Resize += (s, e) =>
+            {
+                btnCloseOverlay.Location = new Point(Math.Max(8, overlayPanel.ClientSize.Width - btnCloseOverlay.Width - 12), 8);
+            };
+
+            overlayPanel.Controls.Add(btnCloseOverlay);
+            this.Controls.Add(overlayPanel);
+            overlayPanel.BringToFront();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        private void ShowOverlayForm(Form f)
+        {
+            EnsureOverlay();
+            // remove any children except close button
+            for (int i = overlayPanel.Controls.Count - 1; i >= 0; i--)
+            {
+                var c = overlayPanel.Controls[i];
+                if (c == btnCloseOverlay) continue;
+                overlayPanel.Controls.Remove(c);
+                if (c is Form old) { try { old.Dispose(); } catch { } }
+            }
+
+            f.TopLevel = false;
+            f.FormBorderStyle = FormBorderStyle.None;
+            f.Dock = DockStyle.Fill;
+            overlayPanel.Controls.Add(f);
+            overlayPanel.Controls.SetChildIndex(btnCloseOverlay, 0);
+            overlayPanel.Visible = true;
+            cardsPanel.Visible = false;
+            f.Show();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        private void CloseOverlay()
+        {
+            if (overlayPanel == null) return;
+            for (int i = overlayPanel.Controls.Count - 1; i >= 0; i--)
+            {
+                var c = overlayPanel.Controls[i];
+                if (c == btnCloseOverlay) continue;
+                overlayPanel.Controls.Remove(c);
+                if (c is Form f) { try { f.Close(); f.Dispose(); } catch { } }
+            }
+            overlayPanel.Visible = false;
+            cardsPanel.Visible = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // helpers
+        private string Shorten(string s, int max)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            return s.Length <= max ? s : s.Substring(0, max - 3) + "...";
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Rounded rectangle
+        private System.Drawing.Drawing2D.GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        {
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            int d = radius * 2;
+            path.AddArc(bounds.X, bounds.Y, d, d, 180, 90);
+            path.AddArc(bounds.Right - d, bounds.Y, d, d, 270, 90);
+            path.AddArc(bounds.Right - d, bounds.Bottom - d, d, d, 0, 90);
+            path.AddArc(bounds.X, bounds.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
     }
 }

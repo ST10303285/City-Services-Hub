@@ -1,21 +1,25 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing;
-using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace MunicipalServicesApp.Forms
 {
     partial class ServiceRequestStatusForm
     {
         private IContainer components = null;
+
+        // header
         private Panel headerPanel;
         private Label lblTitle;
         private Label lblSubtitle;
 
-        private Panel contentPanel;
-        private DataGridView dataGridViewRequests;
-        private FlowLayoutPanel bottomButtonsPanel;
+        // main area
+        private FlowLayoutPanel cardsPanel;
 
+        // bottom bar + controls
+        private FlowLayoutPanel bottomButtonsPanel;
         private Button btnRefresh;
         private Label lblSearch;
         private TextBox txtSearchId;
@@ -25,13 +29,9 @@ namespace MunicipalServicesApp.Forms
         private Button btnRecent;
         private Button btnBack;
 
-        private ToolTip mainToolTip;
-
-
-        /// <summary>
+        /// <summary> 
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -41,17 +41,18 @@ namespace MunicipalServicesApp.Forms
             base.Dispose(disposing);
         }
 
-        private void InitialiseComponent()
+        private void InitializeComponent()
         {
             components = new Container();
-            // Form
+
+            // Form base
             this.Text = "Service Request Status";
             this.WindowState = FormWindowState.Maximized;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = ColorTranslator.FromHtml("#F9F9F9");
+            this.ClientSize = new Size(1366, 820);
 
-            
-            // ---------------- Header ----------------
+            //----------------------------------------------------------------------------------Header------------------------------------------------------------------------------
             headerPanel = new Panel
             {
                 Dock = DockStyle.Top,
@@ -80,27 +81,7 @@ namespace MunicipalServicesApp.Forms
             headerPanel.Controls.Add(lblTitle);
             headerPanel.Controls.Add(lblSubtitle);
 
-            //Content Panel
-            contentPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(24),
-                BackColor = ColorTranslator.FromHtml("#F9F9F9")
-            };
-
-            // DataGridView 
-            dataGridViewRequests = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                ReadOnly = true,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = false,
-                BackgroundColor = Color.White
-            };
-
-            // Bottom Buttons Panel
+            //----------------------------------------------------------------------------------Bottom bar------------------------------------------------------------------------------
             bottomButtonsPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Bottom,
@@ -108,14 +89,13 @@ namespace MunicipalServicesApp.Forms
                 FlowDirection = FlowDirection.LeftToRight,
                 Padding = new Padding(10, 14, 10, 14),
                 BackColor = ColorTranslator.FromHtml("#F9F9F9"),
-                WrapContents = false,
-                AutoSize = false
+                WrapContents = false
             };
 
-            // helper factory for styled buttons
+            //------------------------------------------------------------------------------styled button factory---------------------------------------------------------------------- 
             Button StyledButton(string text, string colorHex, bool whiteText = false)
             {
-                var btn = new Button
+                var b = new Button
                 {
                     Text = text,
                     Size = new Size(140, 40),
@@ -125,34 +105,26 @@ namespace MunicipalServicesApp.Forms
                     Font = new Font("Segoe UI", 9F),
                     Margin = new Padding(8, 0, 8, 0)
                 };
-                btn.FlatAppearance.BorderSize = 0;
-                btn.Region = new Region(RoundedRect(new Rectangle(0, 0, btn.Width, btn.Height), 8));
-                return btn;
+                b.FlatAppearance.BorderSize = 0;
+                b.Region = new Region(RoundedRect(new Rectangle(0, 0, b.Width, b.Height), 8));
+                return b;
             }
 
-            // buttons + search controls 
             btnRefresh = StyledButton("Refresh", "#A8D8EA");
             lblSearch = new Label
             {
-                Text = "Search by Request ID (copy-paste ID from grid):",
+                Text = "Search by Request ID:",
                 Font = new Font("Segoe UI", 9F),
                 AutoSize = true,
-                TextAlign = ContentAlignment.MiddleLeft,
                 Padding = new Padding(8, 10, 8, 0)
             };
-            txtSearchId = new TextBox
-            {
-                Width = 360,
-                Font = new Font("Segoe UI", 9F),
-                Margin = new Padding(4, 10, 8, 0)
-            };
+            txtSearchId = new TextBox { Width = 360, Font = new Font("Segoe UI", 9F), Margin = new Padding(4, 10, 8, 0) };
             btnSearch = StyledButton("Search ID", "#A8D8EA");
             btnPrioritise = StyledButton("Show Priority", "#A8D8EA");
             btnShowMST = StyledButton("Analyse routes", "#6CB2B2", true);
             btnRecent = StyledButton("Recent Requests", "#E6E6E6");
             btnBack = StyledButton("Back", "#E6E6E6");
 
-            // Add controls into bottom panel in order
             bottomButtonsPanel.Controls.Add(btnRefresh);
             bottomButtonsPanel.Controls.Add(lblSearch);
             bottomButtonsPanel.Controls.Add(txtSearchId);
@@ -162,34 +134,32 @@ namespace MunicipalServicesApp.Forms
             bottomButtonsPanel.Controls.Add(btnRecent);
             bottomButtonsPanel.Controls.Add(btnBack);
 
+            //---------------------------------------------------------------------------------Cards panel------------------------------------------------------------------------
+            cardsPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                Padding = new Padding(12),
+                BackColor = Color.Transparent
+            };
 
-            // tooltip for helpful hints
-            mainToolTip = new ToolTip(components);
-            mainToolTip.SetToolTip(btnShowMST, "Analyse request locations and suggest efficient route links.");
-            mainToolTip.SetToolTip(btnRecent, "Show the most recent service requests.");
+            // keep card widths consistent on resize
+            cardsPanel.Resize += (s, e) =>
+            {
+                int targetWidth = Math.Max(600, cardsPanel.ClientSize.Width - 48);
+                foreach (Control c in cardsPanel.Controls)
+                    if (c is Panel p) p.Width = targetWidth;
+            };
 
-            contentPanel.Controls.Add(dataGridViewRequests);
-            contentPanel.Controls.Add(bottomButtonsPanel);
-
-            this.Controls.Add(contentPanel);
+            // Add to form 
+            this.Controls.Add(cardsPanel);
+            this.Controls.Add(bottomButtonsPanel);
             this.Controls.Add(headerPanel);
-
-            this.ClientSize = new Size(1366, 820);
         }
 
-        // helper to draw rounded corners for buttons
-        private GraphicsPath RoundedRect(Rectangle bounds, int radius)
-        {
-            var path = new GraphicsPath();
-            int d = radius * 2;
-            path.AddArc(bounds.X, bounds.Y, d, d, 180, 90);
-            path.AddArc(bounds.Right - d, bounds.Y, d, d, 270, 90);
-            path.AddArc(bounds.Right - d, bounds.Bottom - d, d, d, 0, 90);
-            path.AddArc(bounds.X, bounds.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-            return path;
-        }
-
-
+       
+       
     }
 }

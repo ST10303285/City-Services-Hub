@@ -7,21 +7,11 @@ namespace MunicipalServicesApp.Forms
 {
     partial class RequestPriorityForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private IContainer components = null;
 
-        /// <summary>
-        /// Header label and cards panel created by designer partial.
-        /// </summary>
         private FlowLayoutPanel cardsPanel;
         private Label hdr;
 
-        /// <summary>
-        /// Clean up resources.
-        /// </summary>
-        /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -31,9 +21,6 @@ namespace MunicipalServicesApp.Forms
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Designer initialization for RequestPriorityForm.
-        /// </summary>
         private void InitializeComponent()
         {
             components = new Container();
@@ -44,7 +31,7 @@ namespace MunicipalServicesApp.Forms
             this.StartPosition = FormStartPosition.CenterParent;
             this.BackColor = ColorTranslator.FromHtml("#F9F9F9");
 
-            // Header label
+            // ---------------------------------------------------------------------------------------- Header ------------------------------------------------------------------
             hdr = new Label
             {
                 Text = "Priority Order — Requests sorted by priority then date",
@@ -57,7 +44,7 @@ namespace MunicipalServicesApp.Forms
                 Padding = new Padding(16, 8, 0, 0)
             };
 
-            // Cards panel
+            // ---------------------------------------------------------------------------------------- Cards Panel ------------------------------------------------------------
             cardsPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -68,7 +55,7 @@ namespace MunicipalServicesApp.Forms
                 BackColor = Color.Transparent
             };
 
-            // Add controls
+            // Add controls to form
             this.Controls.Add(cardsPanel);
             this.Controls.Add(hdr);
         }

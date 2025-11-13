@@ -51,5 +51,10 @@ namespace MunicipalServicesApp
             f.Show();
             Hide();
         }
+
+        private void InitializeComponent()
+        {
+
+        }
     }
 }
