@@ -17,7 +17,7 @@ namespace MunicipalServicesApp.Forms
         private RequestPriorityHeap heap;
         private ServiceRouteNetwork graph;
 
-        // overlay controls (created lazily)
+        // overlay controls 
         private Panel overlayPanel;
         private Button btnCloseOverlay;
 
@@ -169,7 +169,7 @@ namespace MunicipalServicesApp.Forms
                 Cursor = Cursors.Hand
             };
 
-            // rounded region; will be repainted on size
+            // rounded region
             card.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
