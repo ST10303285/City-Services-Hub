@@ -29,13 +29,14 @@ It is split into **three main parts**:
 8. The main form should open, and you can navigate through the features.
 9. Enjoy using the Community Issue Reporting System!
 
-##Folder Structure:
- ![Project Screenshot](resources/ "A screenshot of the project interface")
+## Folder Structure
+ ![Folder Structure Screenshot](Images/folder_structure.png)
 
 ## Features
 
 ### Main Menu:
 This is the home screen basically and gives you access to all the main features.
+![Home Page](Images/homepage.png)
 
 ### Report Issues Form:
 Users can report issues in their community using the form. You simply need to fill in:
@@ -43,7 +44,9 @@ Users can report issues in their community using the form. You simply need to fi
 - ** Category**: e.g. streetlight, sanitation, etc
 - **Description**: what is wrong
 - **Attachment** (optional): image or file showing the issue.
-A **progress bar** helps you to complete your form so that it is perfect when you submit it.
+- **progress bar** helps you to complete your form so that it is perfect when you submit it.
+![Report Issue Form](Images/report_issues.png)
+
 
 ### Local Events Features:
 Users can view all upcoming events and workshops happening in and around their community.
@@ -53,6 +56,7 @@ Users can view all upcoming events and workshops happening in and around their c
 - **Event Details** - Click an event to see full details, location, contact info, and description.
 - **Recommendations** - Panel shows events based on your searches and clicks.
 - **Smart Tracking** - The application learns your preferences based on what categories and dates you searched for,what events you clicks and recommends events instantly.
+![Local Events Feature](Images/events.png)
 
 ### Service Request Status Feature:
 Users can track and analyse their requests through this feature.
@@ -63,6 +67,7 @@ It consists of a various options such as:
 - **Recent Requests**: View the most recent requests made.
 - **Analyse Routes**: Uses graph with Minimum Spanning Tree to show how requests can be linked and optimised by location and category.
 Each button opens a embedded card-style popup that makes the data easy to read and visually pleasing.
+![Service Request Status Feature](Images/request_status.png)
    
 ## Data Structures Used:
 - **Dictionary**: Used to store and manage event data, allowing for efficient retrieval and updates based on user interactions.
