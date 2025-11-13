@@ -30,7 +30,7 @@ It is split into **three main parts**:
 9. Enjoy using the Community Issue Reporting System!
 
 ## Folder Structure:
- ![Project Screenshot](resources/ "A screenshot of the project interface")
+ ![Folder Structure Screenshot](Images/folder_structure.png) 
 
 ## Features
 
