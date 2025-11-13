@@ -1,6 +1,6 @@
 # Community Issue Reporting System - City Services Hub
 
-### Team Members: Wadiha Boat (ST10303285)
+### Author: Wadiha Boat (ST10303285)
 ### Video Link : https://youtu.be/kg-91Ma4BgM 
 
 ## Overview
@@ -29,23 +29,26 @@ It is split into **three main parts**:
 8. The main form should open, and you can navigate through the features.
 9. Enjoy using the Community Issue Reporting System!
 
-## Folder Structure
- ![Folder Structure Screenshot](Images/folder_structure.png)
+
+## Folder Structure:
+  ![Folder Structure Screenshot](Images/folder_structure.png) 
 
 ## Features
 
 ### Main Menu:
 This is the home screen basically and gives you access to all the main features.
+
 ![Home Page](Images/homepage.png)
 
 ### Report Issues Form:
 Users can report issues in their community using the form. You simply need to fill in:
 - **Location**: area where problem is located
-- ** Category**: e.g. streetlight, sanitation, etc
+- **Category**: e.g. streetlight, sanitation, etc
 - **Description**: what is wrong
 - **Attachment** (optional): image or file showing the issue.
-- **progress bar** helps you to complete your form so that it is perfect when you submit it.
-![Report Issue Form](Images/report_issues.png)
+- **Progress Bar** helps you to complete your form so that it is perfect when you submit it.
+
+ ![Report Issue Form](Images/report_issues.png)
 
 
 ### Local Events Features:
@@ -56,18 +59,26 @@ Users can view all upcoming events and workshops happening in and around their c
 - **Event Details** - Click an event to see full details, location, contact info, and description.
 - **Recommendations** - Panel shows events based on your searches and clicks.
 - **Smart Tracking** - The application learns your preferences based on what categories and dates you searched for,what events you clicks and recommends events instantly.
-![Local Events Feature](Images/events.png)
+
+- ![Local Events Feature](Images/events.png)
 
 ### Service Request Status Feature:
-Users can track and analyse their requests through this feature.
+Users can track and analyse their requests through this feature.The requests come from the issues submitted from the "Report Issues" form.The issue submitted gets saved as a request and then shown in our service request status feature.
 It consists of a various options such as:
 - **Refresh**: Reload latest data
 - **Search for Request by Id**: Find and track a specific request using the request Id
 - **Show Priority Order**: Sorts issues by importance using a heap/priority structure.
 - **Recent Requests**: View the most recent requests made.
 - **Analyse Routes**: Uses graph with Minimum Spanning Tree to show how requests can be linked and optimised by location and category.
-Each button opens a embedded card-style popup that makes the data easy to read and visually pleasing.
-![Service Request Status Feature](Images/request_status.png)
+- **Design Notes**: cards use rounded corners and pastel colours mapped to priority (examples below).
+     - Priority 1 -> #f7d6d6 (soft red/pink)
+     - Priority 2 -> #f7e0c6(soft peach)
+     - Priority 3 ? #c1cdf5 (soft blue)
+     - Priority 4 ? #d6eadc (soft green)
+     - Priority 5 ? #f1f1f1 (light grey)
+- This helps the overall design look visually appealing and makes it quicker and easier for municipal workers to recognise the priority level of a request.
+
+- ![Service Request Status Feature](Images/request_status.png)
    
 ## Data Structures Used:
 - **Dictionary**: Used to store and manage event data, allowing for efficient retrieval and updates based on user interactions.
@@ -77,7 +88,7 @@ Each button opens a embedded card-style popup that makes the data easy to read a
 - **HashSet<string>**: Tracks unique categories and locations for filtering options.
 - **Custom Event Class**: Represents event details including name, date, category, location, and description.
 - **Custom UserPreferences Class**: Tracks user interactions and preferences to tailor event recommendations.
-- **AVL Tree** : To quickly find and display the 10 most recent requests in a sorted order.
+- **AVL Tree** : To quickly find and display the 10 most recent requests made by the user in a sorted order.
 - **Min Heap** : To show requests in order of urgency (lowest number = highest priority).
 - **Graph (Adjacency List)**: To connect service requests that are similar or nearby.
 - **MST (PRIM's algorithm)**: Finds the most efficient path that connect related issues which reduces overlap.
@@ -96,7 +107,7 @@ This helps the municipality see which areas clusters of similar problems, how th
 |Routing Logic       |  Not implemented                             | Implemented ServiceRouteNetwork with MST calculation.                 |
 |Events System       |  Static list                                 | Included filtering, searching and recommendations.                    |
 |Error Handling      |  Very little                                 | Added try-catch blocks.                                               |
-|-------------------------------------------------------------------------------------------------------------------------------------------|
+
 
 
 
@@ -109,8 +120,11 @@ https://www.programiz.com/dsa/avl-tree
 https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/overload-resolution?f1url=%3FappId%3Droslyn%26k%3Dk(CS0121)#ambiguous-overloads
 https://www.simplilearn.com/tutorials/c-sharp-tutorial/what-is-graphs-in-c-sharp
 https://www.programiz.com/dsa/prim-algorithm
+https://www.geeksforgeeks.org/dsa/insertion-in-an-avl-tree/
+https://www.geeksforgeeks.org/dsa/prims-minimum-spanning-tree-mst-greedy-algo-5/
+https://www.i-programmer.info/projects/61/534-minimum-spanning-tree.html?start=2 
 
 ## Declaration:
-I made use of OpenAI as a helper for doing tasks such as data seeding and fixing minor ui issues. Final work was reviewed by myself.
-The chat can be accessed at https://chatgpt.com/share/6914dd4f-5348-8010-81e5-e0f562431828 . 
+I made use of OpenAI as a helper for doing tasks such as data seeding, fixing minor ui issues, etc. Final work was reviewed by myself.
+The chat can be accessed at https://chatgpt.com/share/6914dd4f-5348-8010-81e5-e0f562431828  
 
