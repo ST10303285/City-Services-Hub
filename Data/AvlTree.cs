@@ -195,3 +195,5 @@ namespace MunicipalServicesApp.Data
         }
     }
 }
+
+// Used templates from GeeksForGeeks which can be found here: https://www.geeksforgeeks.org/dsa/insertion-in-an-avl-tree/ as well as Programiz https://www.programiz.com/dsa/avl-tree 
